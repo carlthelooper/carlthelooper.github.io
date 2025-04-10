@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>APY to APR Converter</title>
+  <style>
+    :root {
+      --light-bg: #f6f8fa;
+      --light-text: #24292e;
+      --dark-bg: #0d1117;
+      --dark-text: #c9d1d9;
+      --primary: #0969da;
+      --primary-hover: #005cc5;
+      --border-color: #d0d7de;
+      --border-dark: #30363d;
+      --shadow-light: rgba(27, 31, 35, 0.15);
+      --shadow-dark: rgba(0, 0, 0, 0.5);
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    body.light-mode {
+      background-color: var(--light-bg);
+      color: var(--light-text);
+    }
+    body.dark-mode {
+      background-color: var(--dark-bg);
+      color: var(--dark-text);
+    }
+    .container {
+      max-width: 500px;
+      width: 100%;
+      padding: 20px;
+      background-color: var(--light-bg);
+      color: var(--light-text);
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 6px var(--shadow-light);
+      border-radius: 12px;
+      transition: background-color 0.3s, color 0.3s, box-shadow 0.3s;
+    }
+    body.dark-mode .container {
+      background-color: var(--dark-bg);
+      color: var(--dark-text);
+      border-color: var(--border-dark);
+      box-shadow: 0 4px 6px var(--shadow-dark);
+    }
+    .toggle-container {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 20px;
+    }
+    .toggle-button {
+      width: 40px;
+      height: 20px;
+      background-color: var(--border-color);
+      border-radius: 10px;
+      position: relative;
+      cursor: pointer;
+    }
+    .toggle-button::before {
+      content: '';
+      width: 18px;
+      height: 18px;
+      background-color: var(--light-text);
+      border-radius: 50%;
+      position: absolute;
+      top: 1px;
+      left: 1px;
+      transition: all 0.3s;
+    }
+    body.dark-mode .toggle-button {
+      background-color: var(--primary);
+    }
+    body.dark-mode .toggle-button::before {
+      background-color: var(--dark-text);
+      left: 21px;
+    }
+    .input-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    input[type="number"] {
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      font-size: 1rem;
+      transition: border-color 0.3s, background-color 0.3s;
+      width: 150px;
+      text-align: right;
+      -webkit-appearance: textfield;
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none;
+    }
+    body.dark-mode input[type="number"] {
+      border-color: var(--border-dark);
+      background-color: var(--dark-bg);
+      color: var(--dark-text);
+    }
+    .percent-symbol {
+      margin-left: 8px;
+      font-size: 1rem;
+      color: var(--light-text);
+      transition: color 0.3s;
+    }
+    body.dark-mode .percent-symbol {
+      color: var(--dark-text);
+    }
+    .result {
+      margin-top: 10px;
+      font-weight: bold;
+      font-size: 2rem;
+      text-align: center;
+      color: var(--primary);
+      transition: color 0.3s;
+    }
+    body.dark-mode .result {
+      color: var(--primary-hover);
+    }
+    .formula {
+      margin-top: 20px;
+      font-size: 0.95rem;
+      background-color: var(--light-bg);
+      padding: 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      transition: background-color 0.3s, border-color 0.3s;
+    }
+    body.dark-mode .formula {
+      background-color: var(--dark-bg);
+      border-color: var(--border-dark);
+    }
+  </style>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const body = document.body;
+      const toggleButton = document.querySelector('.toggle-button');
+
+      const currentMode = document.cookie.replace(/(?:(?:^|.*;\s*)mode\s*=\s*([^;]*).*$)|^.*$/, "$1") || 'dark';
+      body.className = `${currentMode}-mode`;
+
+      toggleButton.addEventListener('click', () => {
+        const mode = body.classList.contains('light-mode') ? 'dark' : 'light';
+        body.className = `${mode}-mode`;
+        document.cookie = `mode=${mode};path=/;max-age=31536000`;
+      });
+
+      const apyInput = document.getElementById('apy');
+      apyInput.addEventListener('input', () => {
+        const apy = parseFloat(apyInput.value) / 100;
+        if (!isNaN(apy)) {
+          const apr = Math.log(apy + 1) * 100;
+          document.getElementById('result').innerText = `APR: ${apr.toFixed(2)}%`;
+        } else {
+          document.getElementById('result').innerText = '';
+        }
+      });
+    });
+  </script>
+</head>
+<body>
+  <div class="container">
+    <div class="toggle-container">
+      <div class="toggle-button"></div>
+    </div>
+
+    <h1>APY to APR Converter</h1>
+    <form id="apyForm">
+      <div class="input-container">
+        <input type="number" id="apy" step="0.01" placeholder="Enter APY in %" required>
+        <span class="percent-symbol">%</span>
+      </div>
+    </form>
+    <div class="result" id="result"></div>
+
+    <div class="formula">
+      <p>Formula: <code>APR = ln(APY + 1)</code></p>
+      <p>Example: For an APY of 5%, <code>APR = ln(0.05 + 1) ≈ 4.88%</code></p>
+    </div>
+  </div>
+</body>
+</html>
